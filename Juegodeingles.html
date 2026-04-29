@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Irregular Verbs Challenge - Victoria</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 700px;
+      margin: 40px auto;
+      background: rgba(255,255,255,0.1);
+      padding: 30px;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+    }
+    h1 { margin-bottom: 10px; }
+    .score {
+      font-size: 28px;
+      font-weight: bold;
+      margin: 15px 0;
+    }
+    .verb {
+      font-size: 42px;
+      font-weight: bold;
+      margin: 30px 0;
+      color: #fff;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+    input {
+      padding: 15px;
+      font-size: 22px;
+      width: 300px;
+      border: none;
+      border-radius: 10px;
+      margin: 15px;
+    }
+    button {
+      padding: 15px 30px;
+      font-size: 20px;
+      background: #ff6b6b;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    button:hover { background: #ff5252; }
+    .feedback {
+      margin: 20px 0;
+      font-size: 24px;
+      min-height: 80px;
+    }
+    .correct { color: #4ade80; }
+    .wrong { color: #f87171; }
+    .stats {
+      margin-top: 30px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Irregular Verbs Challenge</h1>
+    <p>¡Vamos a practicar los verbos irregulares!</p>
+    
+    <div class="score">Puntos: <span id="score">0</span> / <span id="total">0</span></div>
+    
+    <div class="verb" id="verb">Cargando verbo...</div>
+    
+    <input type="text" id="answer" placeholder="Escribe el Past Simple" autocomplete="off">
+    <br>
+    <button onclick="checkAnswer()">Enviar Respuesta</button>
+    
+    <div class="feedback" id="feedback"></div>
+    
+    <div class="stats">
+      Correctas: <span id="correct">0</span> | Incorrectas: <span id="wrong">0</span>
+    </div>
+  </div>
+
+  <script>
+    // Lista de verbos irregulares de tu foto (solo los más importantes y comunes)
+    const verbs = [
+      {inf: "be", past: "was/were", pp: "been"},
+      {inf: "become", past: "became", pp: "become"},
+      {inf: "begin", past: "began", pp: "begun"},
+      {inf: "bite", past: "bit", pp: "bitten"},
+      {inf: "blow", past: "blew", pp: "blown"},
+      {inf: "break", past: "broke", pp: "broken"},
+      {inf: "bring", past: "brought", pp: "brought"},
+      {inf: "build", past: "built", pp: "built"},
+      {inf: "buy", past: "bought", pp: "bought"},
+      {inf: "catch", past: "caught", pp: "caught"},
+      {inf: "choose", past: "chose", pp: "chosen"},
+      {inf: "come", past: "came", pp: "come"},
+      {inf: "cost", past: "cost", pp: "cost"},
+      {inf: "cut", past: "cut", pp: "cut"},
+      {inf: "do", past: "did", pp: "done"},
+      {inf: "drink", past: "drank", pp: "drunk"},
+      {inf: "drive", past: "drove", pp: "driven"},
+      {inf: "eat", past: "ate", pp: "eaten"},
+      {inf: "fall", past: "fell", pp: "fallen"},
+      {inf: "feel", past: "felt", pp: "felt"},
+      {inf: "fight", past: "fought", pp: "fought"},
+      {inf: "find", past: "found", pp: "found"},
+      {inf: "forget", past: "forgot", pp: "forgotten"},
+      {inf: "get", past: "got", pp: "got"},
+      {inf: "give", past: "gave", pp: "given"},
+      {inf: "go", past: "went", pp: "gone"},
+      {inf: "grow", past: "grew", pp: "grown"},
+      {inf: "have", past: "had", pp: "had"},
+      {inf: "hear", past: "heard", pp: "heard"},
+      {inf: "hit", past: "hit", pp: "hit"},
+      {inf: "hold", past: "held", pp: "held"},
+      {inf: "hurt", past: "hurt", pp: "hurt"},
+      {inf: "keep", past: "kept", pp: "kept"},
+      {inf: "know", past: "knew", pp: "known"},
+      {inf: "lead", past: "led", pp: "led"},
+      {inf: "leave", past: "left", pp: "left"},
+      {inf: "lend", past: "lent", pp: "lent"},
+      {inf: "let", past: "let", pp: "let"},
+      {inf: "lie", past: "lay", pp: "lain"},
+      {inf: "lose", past: "lost", pp: "lost"},
+      {inf: "make", past: "made", pp: "made"},
+      {inf: "mean", past: "meant", pp: "meant"},
+      {inf: "meet", past: "met", pp: "met"},
+      {inf: "pay", past: "paid", pp: "paid"},
+      {inf: "put", past: "put", pp: "put"},
+      {inf: "read", past: "read", pp: "read"},
+      {inf: "ride", past: "rode", pp: "ridden"},
+      {inf: "ring", past: "rang", pp: "rung"},
+      {inf: "run", past: "ran", pp: "run"},
+      {inf: "say", past: "said", pp: "said"},
+      {inf: "see", past: "saw", pp: "seen"},
+      {inf: "sell", past: "sold", pp: "sold"},
+      {inf: "send", past: "sent", pp: "sent"},
+      {inf: "set", past: "set", pp: "set"},
+      {inf: "shine", past: "shone", pp: "shone"},
+      {inf: "show", past: "showed", pp: "shown"},
+      {inf: "sit", past: "sat", pp: "sat"},
+      {inf: "sleep", past: "slept", pp: "slept"},
+      {inf: "speak", past: "spoke", pp: "spoken"},
+      {inf: "spend", past: "spent", pp: "spent"},
+      {inf: "stand", past: "stood", pp: "stood"},
+      {inf: "steal", past: "stole", pp: "stolen"},
+      {inf: "swim", past: "swam", pp: "swum"},
+      {inf: "take", past: "took", pp: "taken"},
+      {inf: "teach", past: "taught", pp: "taught"},
+      {inf: "tell", past: "told", pp: "told"},
+      {inf: "think", past: "thought", pp: "thought"},
+      {inf: "understand", past: "understood", pp: "understood"},
+      {inf: "wake", past: "woke", pp: "woken"},
+      {inf: "wear", past: "wore", pp: "worn"},
+      {inf: "win", past: "won", pp: "won"},
+      {inf: "write", past: "wrote", pp: "written"}
+    ];
+
+    let score = 0;
+    let total = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+    let currentVerb = {};
+
+    function getRandomVerb() {
+      return verbs[Math.floor(Math.random() * verbs.length)];
+    }
+
+    function newVerb() {
+      currentVerb = getRandomVerb();
+      document.getElementById('verb').textContent = currentVerb.inf;
+      document.getElementById('answer').value = '';
+      document.getElementById('feedback').innerHTML = '';
+    }
+
+    function checkAnswer() {
+      const userAnswer = document.getElementById('answer').value.trim().toLowerCase();
+      const correctPast = currentVerb.past.toLowerCase();
+
+      total++;
+      document.getElementById('total').textContent = total;
+
+      if (userAnswer === correctPast || 
+          (correctPast.includes('/') && userAnswer === correctPast.split('/')[0])) {
+        
+        score++;
+        correctCount++;
+        document.getElementById('score').textContent = score;
+        document.getElementById('correct').textContent = correctCount;
+        
+        document.getElementById('feedback').innerHTML = 
+          `<span class="correct">¡Correcto! ✅</span><br>
+           ${currentVerb.inf} → ${currentVerb.past}`;
+        
+      } else {
+        wrongCount++;
+        document.getElementById('wrong').textContent = wrongCount;
+        
+        document.getElementById('feedback').innerHTML = 
+          `<span class="wrong">Incorrecto ❌</span><br>
+           ${currentVerb.inf} → <strong>${currentVerb.past}</strong><br>
+           <small>Forma correcta: ${currentVerb.past} / ${currentVerb.pp}</small>`;
+      }
+
+      // Siguiente verbo después de 2 segundos
+      setTimeout(newVerb, 2200);
+    }
+
+    // Iniciar el juego
+    window.onload = () => {
+      newVerb();
+      document.getElementById('answer').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          checkAnswer();
+        }
+      });
+    };
+  </script>
+</body>
+</html>
